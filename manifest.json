@@ -1,0 +1,21 @@
+{
+  "name": "書籍出版トラッカー",
+  "short_name": "出版トラッカー",
+  "description": "ADHDに優しい本の出版に特化したタスク管理ツール",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6fafa",
+  "theme_color": "#296960",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/296960/ffffff.png?text=Book",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/296960/ffffff.png?text=Book",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

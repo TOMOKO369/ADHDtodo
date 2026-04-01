@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="light" lang="ja">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>書籍出版トラッカー (ADHD Focus)</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f6fafa">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-dim": "#3a5764", "surface-dim": "#d1dcdd", "tertiary-dim": "#2d5a61",
+              "on-background": "#2a3435", "tertiary-fixed-dim": "#b4e2ea", "surface": "#f6fafa",
+              "surface-tint": "#296960", "outline-variant": "#a9b4b5", "primary": "#296960",
+              "surface-container-lowest": "#ffffff", "primary-fixed": "#afefe3",
+              "inverse-on-surface": "#999e9e", "primary-container": "#afefe3",
+              "on-error-container": "#6e0a12", "secondary-container": "#c9e7f7",
+              "on-tertiary-fixed-variant": "#39666d", "on-primary": "#e2fff8",
+              "on-primary-container": "#185b53", "on-tertiary": "#ecfcff",
+              "on-surface": "#2a3435", "primary-dim": "#1a5d54", "inverse-surface": "#0a0f0f",
+              "on-secondary-container": "#395663", "surface-container-low": "#eef5f5",
+              "surface-container-highest": "#dae5e5", "surface-container": "#e8eff0",
+              "on-tertiary-container": "#2f5c63", "primary-fixed-dim": "#a1e1d5",
+              "error-dim": "#67040d", "on-primary-fixed-variant": "#25655c",
+              "on-tertiary-fixed": "#1a4950", "on-surface-variant": "#576162",
+              "tertiary-fixed": "#c2f0f9", "surface-bright": "#f6fafa", "outline": "#727d7d",
+              "on-primary-fixed": "#004840", "background": "#f6fafa", "on-secondary": "#f3faff",
+              "secondary": "#466370", "error-container": "#fa746f", "tertiary": "#39666d",
+              "tertiary-container": "#c2f0f9", "on-secondary-fixed-variant": "#435f6d",
+              "secondary-fixed": "#c9e7f7", "inverse-primary": "#b7f8eb",
+              "surface-variant": "#dae5e5", "secondary-fixed-dim": "#bbd9e9",
+              "surface-container-high": "#e1eaea", "error": "#a83836",
+              "on-error": "#fff7f6", "on-secondary-fixed": "#264350"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.75rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-gradient {
+            background: linear-gradient(135deg, #296960 0%, #1a5d54 100%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .nav-active {
+            color: #1a5d54 !important;
+            background-color: #afefe3 !important;
+        }
+        .nav-inactive {
+            color: #2a3435 !important;
+            opacity: 0.6;
+        }
+        .nav-inactive:hover {
+            background-color: #e8eff0 !important;
+        }
+        .dark .nav-active {
+            color: #ffffff !important;
+            background-color: #296960 !important;
+        }
+        .dark .nav-inactive {
+            color: #a9b4b5 !important;
+        }
+        .dark .nav-inactive:hover {
+            background-color: #2a3435 !important;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen pb-32 transition-colors duration-300">
+    <header class="bg-[#f6fafa] dark:bg-[#1a1c1c] opacity-80 backdrop-blur-md sticky top-0 z-50 w-full transition-colors duration-300">
+        <div class="flex justify-between items-center px-6 py-6 w-full max-w-7xl mx-auto max-w-lg">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl">
+                    B
+                </div>
+                <h1 id="header-title" class="font-manrope font-bold text-xl tracking-tight text-[#296960] dark:text-[#afefe3]">今日やること</h1>
+            </div>
+            <button id="btn-focus-mode" class="bg-[#eef5f5] dark:bg-[#2a3435] text-[#296960] dark:text-[#afefe3] px-3 py-2 rounded-lg font-manrope font-semibold text-xs sm:text-sm active:scale-95 transition-all duration-200 ease-out border border-transparent">
+                神モード(3つだけ)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main View (Today & Planner) -->
+    <main id="main-view" class="px-6 space-y-8 max-w-lg mx-auto">
+        
+        <!-- Timer / Current Task Hero Section -->
+        <section class="mt-2" id="hero-section">
+            <div class="bg-surface-container-lowest rounded-xl p-8 flex flex-col items-center text-center shadow-[0_8px_24px_rgba(42,52,53,0.04)] relative overflow-hidden transition-all duration-300">
+                <div class="relative w-48 h-48 mb-8 flex items-center justify-center">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle class="text-surface-container-low" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+                        <circle id="hero-progress-ring" class="text-primary-container transition-all duration-700 ease-in-out" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="552.92" stroke-width="8"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="hero-time" class="text-4xl font-headline font-extrabold text-on-surface">--:--</span>
+                        <span class="text-xs uppercase tracking-widest text-outline font-semibold mt-1">目安時間</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 w-full">
+                    <span id="hero-status" class="text-sm font-semibold text-tertiary tracking-widest uppercase">次のタスク</span>
+                    <h2 id="hero-title" class="text-2xl sm:text-3xl font-headline font-extrabold text-on-surface leading-tight min-h-[4rem] flex items-center justify-center">タスクがありません</h2>
+                    <p id="hero-desc" class="text-on-surface-variant text-sm sm:text-base">すべて完了しました！お疲れ様です。</p>
+                </div>
+                
+                <button id="btn-complete-hero" class="mt-8 w-full tonal-gradient text-on-primary font-headline font-bold py-4 rounded-lg active:scale-[0.98] transition-transform hidden">
+                    完了にする
+                </button>
+            </div>
+        </section>
+
+        <!-- Progress Bar Section -->
+        <section class="space-y-2">
+            <div class="flex justify-between items-end px-1">
+                <h3 class="text-sm font-semibold text-outline-variant tracking-widest uppercase">執筆全体の進捗</h3>
+                <span id="total-progress-text" class="text-sm font-bold text-primary">0%</span>
+            </div>
+            <div class="w-full bg-surface-container-highest rounded-full h-3 overflow-hidden shadow-inner">
+                <div id="total-progress-bar" class="bg-primary h-3 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <!-- Task List Section -->
+        <section class="space-y-4">
+            <div class="flex justify-between items-end px-1">
+                <h3 id="task-list-title" class="text-sm font-semibold text-outline-variant tracking-widest uppercase">タスク一覧</h3>
+                <span id="task-count-text" class="text-xs font-bold text-primary">0 個</span>
+            </div>
+            
+            <div id="task-list-container" class="space-y-3 pb-8">
+                <!-- Tasks injected by app.js -->
+            </div>
+        </section>
+        
+        <!-- Energy Section (Kept from design) -->
+        <section class="space-y-4 pt-2">
+            <h3 class="text-sm font-semibold text-outline-variant tracking-widest uppercase px-1">今の気分は？</h3>
+            <div class="flex justify-between items-center bg-surface-container-low rounded-xl p-4 shadow-sm">
+                <button class="energy-btn flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-surface-container-lowest transition-colors active:scale-95" data-mood="calm">
+                    <span class="text-2xl">🌿</span>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">穏やか</span>
+                </button>
+                <button class="energy-btn flex flex-col items-center gap-2 p-3 rounded-lg bg-surface-container-lowest shadow-sm active:scale-95 border border-primary/20" data-mood="focused">
+                    <span class="text-2xl">⚡</span>
+                    <span class="text-[10px] font-bold text-primary uppercase">集中</span>
+                </button>
+                <button class="energy-btn flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-surface-container-lowest transition-colors active:scale-95" data-mood="low">
+                    <span class="text-2xl">☕</span>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">休憩必要</span>
+                </button>
+                <button class="energy-btn flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-surface-container-lowest transition-colors active:scale-95" data-mood="flow">
+                    <span class="text-2xl">🌊</span>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">フロー</span>
+                </button>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Settings View (Hidden by default) -->
+    <main id="settings-view" class="hidden px-6 space-y-6 max-w-lg mx-auto mt-4 pb-20">
+        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-variant">
+            <div class="flex items-center gap-3 mb-6 border-b border-surface-variant pb-4">
+                <span class="material-symbols-outlined text-primary text-2xl">database</span>
+                <h2 class="text-xl font-headline font-bold text-on-surface">データ管理</h2>
+            </div>
+            
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">
+                データは全てブラウザ内（ローカル）に保存されています。データが消えないように定期的にバックアップを保存することをおすすめします。
+            </p>
+            
+            <div class="space-y-4">
+                <button id="btn-export-csv" class="w-full flex items-center justify-center gap-2 bg-secondary-container text-on-secondary-container py-3 rounded-xl font-bold shadow-sm active:scale-[0.98] transition-all">
+                    <span class="material-symbols-outlined text-[20px]">table_chart</span>
+                    CSVで書き出す（スプレッドシート用）
+                </button>
+                
+                <button id="btn-export-json" class="w-full flex items-center justify-center gap-2 text-primary border-2 border-primary/30 py-3 rounded-xl font-bold hover:bg-primary/5 active:scale-[0.98] transition-all">
+                    <span class="material-symbols-outlined text-[20px]">download</span>
+                    バックアップを保存 (JSON)
+                </button>
+                
+                <div class="relative w-full pt-4 mt-4 border-t border-surface-variant border-dashed">
+                    <input type="file" id="file-import" accept=".json" class="hidden">
+                    <button id="btn-import-trigger" class="w-full flex items-center justify-center gap-2 text-outline border-2 border-outline/30 py-3 rounded-xl font-bold hover:bg-outline/5 active:scale-[0.98] transition-all">
+                        <span class="material-symbols-outlined text-[20px]">upload</span>
+                        データを復元 (JSON)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add to Home Screen -->
+        <div id="pwa-install-container" class="hidden bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-variant">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-primary text-2xl">widgets</span>
+                <h2 class="text-xl font-headline font-bold text-on-surface">アプリとして追加</h2>
+            </div>
+            <p class="text-sm text-on-surface-variant mb-4">ホーム画面に追加して、アプリのように素早くアクセスできます。</p>
+            <button id="btn-install-pwa" class="w-full tonal-gradient text-on-primary py-3 rounded-xl font-bold active:scale-[0.98] transition-all shadow-md">
+                ホーム画面に追加する
+            </button>
+        </div>
+        
+        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-variant">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="material-symbols-outlined text-primary text-2xl">delete_forever</span>
+                    <h2 class="text-lg font-headline font-bold text-on-surface">全データリセット</h2>
+                </div>
+            </div>
+            <p class="text-xs text-error mb-4">タスクを初期状態（本の出版タスク）に戻します。現在のデータはすべて消去されます。</p>
+            <button id="btn-reset-data" class="w-full text-error border border-error/50 py-3 rounded-xl font-bold hover:bg-error/5 active:scale-[0.98] transition-all">
+                初期状態にリセット
+            </button>
+        </div>
+    </main>
+
+    <!-- BottomNavBar -->
+    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 sm:px-6 pb-6 pt-3 bg-[#f6fafa] dark:bg-[#1a1c1c] shadow-[0_-8px_24px_rgba(42,52,53,0.06)] rounded-t-[1.5rem] border-t border-surface-variant/40 transition-colors duration-300">
+        <!-- Today Tab -->
+        <button id="tab-today" class="tab-btn flex flex-col items-center justify-center rounded-xl px-4 sm:px-6 py-2 transition-all nav-active active:scale-95">
+            <span class="material-symbols-outlined text-2xl" data-icon="today">today</span>
+            <span class="font-inter text-[11px] sm:text-[12px] font-bold tracking-wide mt-1">今日</span>
+        </button>
+        <!-- Planner Tab -->
+        <button id="tab-planner" class="tab-btn flex flex-col items-center justify-center rounded-xl px-4 sm:px-6 py-2 transition-all nav-inactive active:scale-95">
+            <span class="material-symbols-outlined text-2xl" data-icon="calendar_today">calendar_today</span>
+            <span class="font-inter text-[11px] sm:text-[12px] font-bold tracking-wide mt-1">全体計画</span>
+        </button>
+        <!-- Settings Tab -->
+        <button id="tab-settings" class="tab-btn flex flex-col items-center justify-center rounded-xl px-4 sm:px-6 py-2 transition-all nav-inactive active:scale-95">
+            <span class="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
+            <span class="font-inter text-[11px] sm:text-[12px] font-bold tracking-wide mt-1">設定/データ</span>
+        </button>
+    </nav>
+    
+    <script src="app.js"></script>
+</body>
+</html>
