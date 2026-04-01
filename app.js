@@ -17,7 +17,7 @@ let focusMode = false;
 let activeTaskId = null;
 
 let lastTimerTaskId = null;
-let timerLeft = 0;
+let timerElapsed = 0;
 let isTimerRunning = false;
 let timerInterval = null;
 
@@ -262,17 +262,13 @@ function toggleTimer() {
 }
 
 function startTimer() {
-    if(timerLeft <= 0) return;
     isTimerRunning = true;
     document.getElementById('timer-start-icon').textContent = 'pause';
     document.getElementById('timer-start-text').textContent = '一時停止';
     
     timerInterval = setInterval(() => {
-        timerLeft--;
-        updateTimerDisplay(timerLeft);
-        if(timerLeft <= 0) {
-            stopTimer();
-        }
+        timerElapsed++;
+        updateTimerDisplay(timerElapsed);
     }, 1000);
 }
 
@@ -288,11 +284,8 @@ function stopTimer() {
 
 function resetTimer() {
     stopTimer();
-    const t = tasks.find(x => x.id === activeTaskId);
-    if(t) {
-        timerLeft = t.time * 60;
-        updateTimerDisplay(timerLeft);
-    }
+    timerElapsed = 0;
+    updateTimerDisplay(timerElapsed);
 }
 
 function updateTimerDisplay(seconds) {
@@ -310,15 +303,15 @@ function updateTimerDisplay(seconds) {
     // update ring
     const t = tasks.find(x => x.id === activeTaskId);
     if(t) {
-        const totalSeconds = t.time * 60;
+        const totalSeconds = (parseInt(t.time) || 30) * 60;
         const progressRing = document.getElementById('hero-progress-ring');
         if(totalSeconds > 0) {
-            const pct = seconds / totalSeconds;
-            // 552.92 is circumference
+            let pct = seconds / totalSeconds;
+            if(pct > 1) pct = 1;
             const offset = 552.92 * (1 - pct);
             progressRing.style.strokeDashoffset = offset.toString();
         } else {
-            document.getElementById('hero-progress-ring').style.strokeDashoffset = "0";
+            document.getElementById('hero-progress-ring').style.strokeDashoffset = "552.92";
         }
     }
 }
@@ -410,7 +403,7 @@ function renderHero() {
 
     if(lastTimerTaskId !== t.id) {
         stopTimer();
-        timerLeft = t.time * 60;
+        timerElapsed = 0;
         lastTimerTaskId = t.id;
     }
 
@@ -430,7 +423,7 @@ function renderHero() {
         heroStatus.textContent = "次のタスク";
         heroStatus.classList.replace('text-primary', 'text-tertiary');
         timerControls.classList.remove('hidden');
-        updateTimerDisplay(timerLeft);
+        updateTimerDisplay(timerElapsed);
         
         // Calculate days left
         const todayStr = getToday();
