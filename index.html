@@ -94,8 +94,8 @@
     <header class="bg-[#f6fafa] dark:bg-[#1a1c1c] opacity-80 backdrop-blur-md sticky top-0 z-50 w-full transition-colors duration-300">
         <div class="flex justify-between items-center px-6 py-6 w-full max-w-7xl mx-auto max-w-lg">
             <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl">
-                    B
+                <div class="px-3 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm tracking-widest">
+                    TODO
                 </div>
                 <h1 id="header-title" class="font-manrope font-bold text-xl tracking-tight text-[#296960] dark:text-[#afefe3]">今日やること</h1>
             </div>
@@ -128,7 +128,18 @@
                     <p id="hero-desc" class="text-on-surface-variant text-sm sm:text-base">すべて完了しました！お疲れ様です。</p>
                 </div>
                 
-                <button id="btn-complete-hero" class="mt-8 w-full tonal-gradient text-on-primary font-headline font-bold py-4 rounded-lg active:scale-[0.98] transition-transform hidden">
+                <div id="timer-controls" class="flex gap-4 mt-6 w-full mx-auto hidden">
+                    <button id="btn-timer-start" class="flex-1 bg-primary text-on-primary py-3 rounded-lg font-bold shadow-sm active:scale-95 transition-all text-sm flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[18px]" id="timer-start-icon">play_arrow</span>
+                        <span id="timer-start-text">スタート</span>
+                    </button>
+                    <button id="btn-timer-reset" class="flex-1 bg-surface-variant text-on-surface py-3 rounded-lg font-bold active:scale-95 transition-all text-sm flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[18px]">replay</span>
+                        リセット
+                    </button>
+                </div>
+                
+                <button id="btn-complete-hero" class="mt-4 w-full tonal-gradient text-on-primary font-headline font-bold py-4 rounded-lg active:scale-[0.98] transition-transform hidden">
                     完了にする
                 </button>
             </div>
@@ -137,7 +148,7 @@
         <!-- Progress Bar Section -->
         <section class="space-y-2">
             <div class="flex justify-between items-end px-1">
-                <h3 class="text-sm font-semibold text-outline-variant tracking-widest uppercase">執筆全体の進捗</h3>
+                <h3 class="text-sm font-semibold text-outline-variant tracking-widest uppercase">全体の進捗</h3>
                 <span id="total-progress-text" class="text-sm font-bold text-primary">0%</span>
             </div>
             <div class="w-full bg-surface-container-highest rounded-full h-3 overflow-hidden shadow-inner">

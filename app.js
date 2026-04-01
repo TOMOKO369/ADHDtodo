@@ -16,6 +16,11 @@ let currentTab = 'today'; // 'today', 'planner', 'settings'
 let focusMode = false;
 let activeTaskId = null;
 
+let lastTimerTaskId = null;
+let timerLeft = 0;
+let isTimerRunning = false;
+let timerInterval = null;
+
 // Initialization
 function init() {
     loadTasks();
@@ -137,6 +142,9 @@ function bindEvents() {
         }
     });
 
+    document.getElementById('btn-timer-start').addEventListener('click', toggleTimer);
+    document.getElementById('btn-timer-reset').addEventListener('click', resetTimer);
+
     document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
     document.getElementById('btn-export-json').addEventListener('click', exportJSON);
     document.getElementById('btn-import-trigger').addEventListener('click', () => document.getElementById('file-import').click());
@@ -245,6 +253,76 @@ function bindEvents() {
     });
 }
 
+function toggleTimer() {
+    if(isTimerRunning) {
+        stopTimer();
+    } else {
+        startTimer();
+    }
+}
+
+function startTimer() {
+    if(timerLeft <= 0) return;
+    isTimerRunning = true;
+    document.getElementById('timer-start-icon').textContent = 'pause';
+    document.getElementById('timer-start-text').textContent = '一時停止';
+    
+    timerInterval = setInterval(() => {
+        timerLeft--;
+        updateTimerDisplay(timerLeft);
+        if(timerLeft <= 0) {
+            stopTimer();
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    isTimerRunning = false;
+    document.getElementById('timer-start-icon').textContent = 'play_arrow';
+    document.getElementById('timer-start-text').textContent = 'スタート';
+    if(timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function resetTimer() {
+    stopTimer();
+    const t = tasks.find(x => x.id === activeTaskId);
+    if(t) {
+        timerLeft = t.time * 60;
+        updateTimerDisplay(timerLeft);
+    }
+}
+
+function updateTimerDisplay(seconds) {
+    const heroTime = document.getElementById('hero-time');
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    
+    if(h > 0) {
+        heroTime.textContent = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    } else {
+        heroTime.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    
+    // update ring
+    const t = tasks.find(x => x.id === activeTaskId);
+    if(t) {
+        const totalSeconds = t.time * 60;
+        const progressRing = document.getElementById('hero-progress-ring');
+        if(totalSeconds > 0) {
+            const pct = seconds / totalSeconds;
+            // 552.92 is circumference
+            const offset = 552.92 * (1 - pct);
+            progressRing.style.strokeDashoffset = offset.toString();
+        } else {
+            document.getElementById('hero-progress-ring').style.strokeDashoffset = "0";
+        }
+    }
+}
+
 function switchTab(tab) {
     currentTab = tab;
     // hide focus mode when switching to planner
@@ -317,21 +395,26 @@ function renderHero() {
     const heroStatus = document.getElementById('hero-status');
     const btnComplete = document.getElementById('btn-complete-hero');
     const progressRing = document.getElementById('hero-progress-ring');
+    const timerControls = document.getElementById('timer-controls');
     
     if(!t) {
         heroTitle.textContent = "タスクがありません";
         heroTime.textContent = "--:--";
         heroDesc.textContent = "すべて完了しました！お疲れ様です。";
         btnComplete.classList.add('hidden');
+        timerControls.classList.add('hidden');
         heroStatus.textContent = "準備完了";
         progressRing.style.strokeDashoffset = "552.92"; // Empty
         return;
     }
 
+    if(lastTimerTaskId !== t.id) {
+        stopTimer();
+        timerLeft = t.time * 60;
+        lastTimerTaskId = t.id;
+    }
+
     heroTitle.textContent = t.title;
-    const hours = Math.floor(t.time / 60);
-    const mins = t.time % 60;
-    heroTime.textContent = hours > 0 ? `${hours}h${mins > 0 ? mins+'m' : ''}` : `${mins}m`;
     
     if(t.completed) {
         heroStatus.textContent = "完了済✨";
@@ -340,10 +423,14 @@ function renderHero() {
         btnComplete.textContent = "未完了に戻す";
         btnComplete.classList.remove('tonal-gradient', 'text-on-primary');
         btnComplete.classList.add('bg-surface-variant', 'text-on-surface');
-        progressRing.style.strokeDashoffset = "0"; // Full
+        timerControls.classList.add('hidden');
+        updateTimerDisplay(t.time * 60);
+        progressRing.style.strokeDashoffset = "0"; // Full overriden here for completed state
     } else {
         heroStatus.textContent = "次のタスク";
         heroStatus.classList.replace('text-primary', 'text-tertiary');
+        timerControls.classList.remove('hidden');
+        updateTimerDisplay(timerLeft);
         
         // Calculate days left
         const todayStr = getToday();
@@ -361,7 +448,6 @@ function renderHero() {
         btnComplete.textContent = "このタスクを完了にする";
         btnComplete.classList.add('tonal-gradient', 'text-on-primary');
         btnComplete.classList.remove('bg-surface-variant', 'text-on-surface');
-        progressRing.style.strokeDashoffset = (552.92 * 0.9).toString(); // slight progress indication
     }
     btnComplete.classList.remove('hidden');
 }
