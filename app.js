@@ -11,20 +11,6 @@ const getDaysLater = (days) => {
 };
 const getToday = () => getDaysLater(0);
 
-// Default tasks for Book Publishing
-const defaultTasks = [
-    { id: '1', title: '本のテーマ・ターゲット設定', time: 60, deadline: getToday(), completed: false },
-    { id: '2', title: '企画書の作成（目次・構成）', time: 120, deadline: getToday(), completed: false },
-    { id: '3', title: '第1章の執筆', time: 180, deadline: getDaysLater(1), completed: false },
-    { id: '4', title: '第2章の執筆', time: 180, deadline: getDaysLater(2), completed: false },
-    { id: '5', title: '第3章の執筆', time: 180, deadline: getDaysLater(3), completed: false },
-    { id: '6', title: '「はじめに」「おわりに」の執筆', time: 60, deadline: getDaysLater(4), completed: false },
-    { id: '7', title: '全体の推敲・自己校正', time: 120, deadline: getDaysLater(5), completed: false },
-    { id: '8', title: '表紙デザインの作成・依頼', time: 60, deadline: getDaysLater(6), completed: false },
-    { id: '9', title: 'KDP用フォーマット（EPUB等）作成', time: 60, deadline: getDaysLater(7), completed: false },
-    { id: '10', title: 'KDPへの登録・出版申請', time: 30, deadline: getDaysLater(8), completed: false },
-];
-
 let tasks = [];
 let currentTab = 'today'; // 'today', 'planner', 'settings'
 let focusMode = false;
@@ -57,10 +43,10 @@ function loadTasks() {
         try {
             tasks = JSON.parse(stored);
         } catch(e) {
-            tasks = JSON.parse(JSON.stringify(defaultTasks));
+            tasks = [];
         }
     } else {
-        tasks = JSON.parse(JSON.stringify(defaultTasks));
+        tasks = [];
     }
 }
 
@@ -70,8 +56,9 @@ function saveTasks() {
 }
 
 function resetData() {
-    if(confirm('本当に初期化しますか？')) {
-        tasks = JSON.parse(JSON.stringify(defaultTasks));
+    if(confirm('本当に初期化しますか？すべてのデータが消去されます。')) {
+        tasks = [];
+        activeTaskId = null;
         saveTasks();
         alert('データをリセットしました');
     }
@@ -155,6 +142,51 @@ function bindEvents() {
     document.getElementById('btn-import-trigger').addEventListener('click', () => document.getElementById('file-import').click());
     document.getElementById('file-import').addEventListener('change', importJSON);
     document.getElementById('btn-reset-data').addEventListener('click', resetData);
+
+    // Add Task Modal Events
+    document.getElementById('btn-open-add-task').addEventListener('click', () => {
+        document.getElementById('newTaskDate').value = getToday();
+        document.getElementById('addTaskModal').classList.remove('hidden');
+        document.getElementById('addTaskModal').classList.add('flex');
+    });
+
+    document.getElementById('btnCancelTask').addEventListener('click', () => {
+        document.getElementById('addTaskModal').classList.add('hidden');
+        document.getElementById('addTaskModal').classList.remove('flex');
+    });
+
+    document.getElementById('btnSaveTask').addEventListener('click', () => {
+        const title = document.getElementById('newTaskTitle').value.trim();
+        const time = parseInt(document.getElementById('newTaskTime').value) || 30;
+        const deadline = document.getElementById('newTaskDate').value || getToday();
+
+        if(!title) {
+            alert('タスク名を入力してください');
+            return;
+        }
+
+        const newTask = {
+            id: Date.now().toString(),
+            title,
+            time,
+            deadline,
+            completed: false
+        };
+
+        tasks.push(newTask);
+        saveTasks();
+
+        // reset and close
+        document.getElementById('newTaskTitle').value = '';
+        document.getElementById('addTaskModal').classList.add('hidden');
+        document.getElementById('addTaskModal').classList.remove('flex');
+        
+        // set as active if no active task
+        if(!activeTaskId) {
+            activeTaskId = newTask.id;
+            render();
+        }
+    });
 
     // Energy buttons effect
     document.querySelectorAll('.energy-btn').forEach(btn => {

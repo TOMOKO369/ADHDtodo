@@ -234,12 +234,44 @@
                     <h2 class="text-lg font-headline font-bold text-on-surface">全データリセット</h2>
                 </div>
             </div>
-            <p class="text-xs text-error mb-4">タスクを初期状態（本の出版タスク）に戻します。現在のデータはすべて消去されます。</p>
+            <p class="text-xs text-error mb-4">現在のタスクデータをすべて消去し、完全に初期化します。</p>
             <button id="btn-reset-data" class="w-full text-error border border-error/50 py-3 rounded-xl font-bold hover:bg-error/5 active:scale-[0.98] transition-all">
                 初期状態にリセット
             </button>
         </div>
     </main>
+
+    <!-- FAB Add Task -->
+    <button id="btn-open-add-task" class="fixed bottom-28 right-6 lg:right-[calc(50vw-240px)] w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-[40] hover:bg-primary-dim">
+        <span class="material-symbols-outlined text-3xl">add</span>
+    </button>
+
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-surface-container-lowest text-on-surface w-full max-w-sm rounded-2xl p-6 shadow-xl transform scale-100 transition-transform">
+            <h3 class="text-lg font-headline font-bold mb-4 text-primary">新しいタスク</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant mb-1">タスク名</label>
+                    <input type="text" id="newTaskTitle" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" placeholder="例: 書類を作成する" />
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">所要時間 (分)</label>
+                        <input type="number" id="newTaskTime" value="30" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-on-surface-variant mb-1">締切日</label>
+                        <input type="date" id="newTaskDate" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="btnCancelTask" class="flex-1 bg-surface-variant text-on-surface py-3 rounded-xl font-bold active:scale-95 transition-all text-sm">キャンセル</button>
+                <button id="btnSaveTask" class="flex-1 tonal-gradient text-on-primary py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">追加する</button>
+            </div>
+        </div>
+    </div>
 
     <!-- BottomNavBar -->
     <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 sm:px-6 pb-6 pt-3 bg-[#f6fafa] dark:bg-[#1a1c1c] shadow-[0_-8px_24px_rgba(42,52,53,0.06)] rounded-t-[1.5rem] border-t border-surface-variant/40 transition-colors duration-300">
